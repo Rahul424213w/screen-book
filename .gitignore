@@ -1,0 +1,20 @@
+# Dependencies — never commit these
+node_modules/
+
+# Environment secrets — NEVER commit
+.env
+
+# Old JSON database — replaced by MongoDB
+database.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
