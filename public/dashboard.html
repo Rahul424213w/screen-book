@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<h1>📊 Movie Stats</h1>
+
+<canvas id="ratingChart"></canvas>
+
+<script>
+
+fetch("/api/data")
+.then(r=>r.json())
+.then(data=>{
+
+let ratings = data.watched.map(m=>parseInt(m.rating))
+
+new Chart(
+document.getElementById("ratingChart"),
+{
+type:"bar",
+
+data:{
+labels:ratings,
+datasets:[{
+label:"Ratings",
+data:ratings
+}]
+}
+})
+
+})
+
+</script>
+
+</body>
+</html>

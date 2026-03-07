@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScreenBook — Movie Details</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root { --black:#080810;--deep:#0d0d1a;--card:#12121f;--card2:#1a1a2e;--border:rgba(255,255,255,0.07);--gold:#f5c842;--gold2:#e8a020;--text:#e8e8f0;--muted:#6b6b80; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);min-height:100vh}
+  .back-btn{position:fixed;top:20px;left:20px;z-index:100;padding:10px 18px;background:rgba(255,255,255,0.1);border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;backdrop-filter:blur(8px);transition:all .2s}
+  .back-btn:hover{background:rgba(255,255,255,0.15)}
+  .hero{position:relative;height:500px;overflow:hidden}
+  .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(20px) brightness(0.3);transform:scale(1.1)}
+  .hero-content{position:relative;z-index:2;display:flex;gap:32px;padding:80px 48px 40px;align-items:flex-end;height:100%}
+  .hero-poster{width:200px;min-width:200px;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.7)}
+  .hero-info{flex:1}
+  .hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5vw,56px);letter-spacing:3px;line-height:1.1;margin-bottom:12px}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  .meta-chip{padding:5px 12px;background:rgba(255,255,255,0.1);border-radius:8px;font-size:12px;border:1px solid rgba(255,255,255,0.1)}
+  .meta-chip.gold{background:rgba(245,200,66,0.15);color:var(--gold);border-color:rgba(245,200,66,0.3)}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+  .hero-btn{padding:12px 24px;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s;text-decoration:none}
+  .hero-btn-primary{background:linear-gradient(135deg,var(--gold2),var(--gold));color:var(--black)}
+  .hero-btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,200,66,0.3)}
+  .hero-btn-secondary{background:rgba(255,255,255,0.1);color:var(--text);border:1px solid rgba(255,255,255,0.15)}
+  .hero-btn-secondary:hover{background:rgba(255,255,255,0.18)}
+  .content{max-width:900px;margin:0 auto;padding:40px 48px}
+  .plot{font-size:16px;line-height:1.8;color:var(--muted);margin-bottom:32px}
+  .details-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:32px}
+  .detail-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px}
+  .detail-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .detail-value{font-size:14px;color:var(--text);line-height:1.5}
+  .ratings-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:32px}
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:16px}
+  .rating-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+  .rating-source{font-size:13px;color:var(--muted)}
+  .rating-val{font-size:14px;font-weight:600;color:var(--gold)}
+  .loading{display:flex;align-items:center;justify-content:center;height:60vh;gap:12px;color:var(--muted);font-size:16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @media(max-width:768px){.hero-content{flex-direction:column;align-items:flex-start;padding:60px 20px 24px}.hero-poster{width:140px;min-width:140px}.content{padding:24px 20px}}
+</style>
+</head>
+<body>
+<a href="/index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+<div id="app"><div class="loading"><div class="spinner"></div> Loading movie details...</div></div>
+
+<script>
+const token = localStorage.getItem('sb_token');
+if (!token) window.location.href = '/login.html';
+
+async function api(url, opts={}) {
+  const res = await fetch(url, { headers: {'Content-Type':'application/json','x-auth-token':token}, ...opts });
+  if (res.status===401) { localStorage.clear(); window.location.href='/login.html'; }
+  return res.json();
+}
+
+const id = new URLSearchParams(window.location.search).get('id');
+if (!id) window.location.href = '/index.html';
+
+async function load() {
+  const [m, ud] = await Promise.all([api(`/api/movie/${id}`), api('/api/data')]);
+  if (!m || m.Response === 'False') {
+    document.getElementById('app').innerHTML = '<div class="loading">Movie not found</div>';
+    return;
+  }
+  document.title = `${m.Title} — ScreenBook`;
+
+  const watchedIds = new Set((ud.watched||[]).map(x=>x.imdbID));
+  const watchlistIds = new Set((ud.watchlist||[]).map(x=>x.imdbID));
+  const favIds = new Set((ud.favorites||[]).map(x=>x.imdbID));
+
+  const movieData = JSON.stringify(m).replace(/"/g,'&quot;');
+
+  document.getElementById('app').innerHTML = `
+    <div class="hero">
+      <div class="hero-bg" style="background-image:url('${m.Poster&&m.Poster!=='N/A'?m.Poster:''}')"></div>
+      <div class="hero-content">
+        ${m.Poster&&m.Poster!=='N/A'?`<img class="hero-poster" src="${m.Poster}" alt="${m.Title}">`:''}
+        <div class="hero-info">
+          <div class="hero-title">${m.Title}</div>
+          <div class="hero-meta">
+            ${m.Year?`<span class="meta-chip">${m.Year}</span>`:''}
+            ${m.Runtime&&m.Runtime!=='N/A'?`<span class="meta-chip">${m.Runtime}</span>`:''}
+            ${m.Rated&&m.Rated!=='N/A'?`<span class="meta-chip">${m.Rated}</span>`:''}
+            ${m.imdbRating&&m.imdbRating!=='N/A'?`<span class="meta-chip gold">⭐ ${m.imdbRating} IMDb</span>`:''}
+            ${m.Genre?m.Genre.split(', ').map(g=>`<span class="meta-chip">${g}</span>`).join(''):''}
+          </div>
+          <div class="hero-actions">
+            ${!watchedIds.has(id)?`
+              ${!watchlistIds.has(id)?`<button class="hero-btn hero-btn-secondary" onclick="addWatchlist()"><i class="fas fa-bookmark"></i> Watchlist</button>`:''}
+              <button class="hero-btn hero-btn-primary" onclick="markWatched()"><i class="fas fa-check"></i> Mark Watched</button>
+            `:`<span class="hero-btn hero-btn-secondary" style="cursor:default;opacity:0.7"><i class="fas fa-check"></i> Watched</span>`}
+            <button class="hero-btn hero-btn-secondary" onclick="toggleFav()"><i class="fas fa-star" style="color:${favIds.has(id)?'var(--gold)':''}"></i> ${favIds.has(id)?'Unfavorite':'Favorite'}</button>
+            <a class="hero-btn hero-btn-secondary" href="https://www.youtube.com/results?search_query=${encodeURIComponent(m.Title+' trailer')}" target="_blank"><i class="fab fa-youtube" style="color:#ff4444"></i> Trailer</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content">
+      ${m.Plot&&m.Plot!=='N/A'?`<p class="plot">${m.Plot}</p>`:''}
+      <div class="details-grid">
+        ${m.Director&&m.Director!=='N/A'?`<div class="detail-card"><div class="detail-label">Director</div><div class="detail-value">${m.Director}</div></div>`:''}
+        ${m.Actors&&m.Actors!=='N/A'?`<div class="detail-card"><div class="detail-label">Cast</div><div class="detail-value">${m.Actors}</div></div>`:''}
+        ${m.Language&&m.Language!=='N/A'?`<div class="detail-card"><div class="detail-label">Language</div><div class="detail-value">${m.Language}</div></div>`:''}
+        ${m.Country&&m.Country!=='N/A'?`<div class="detail-card"><div class="detail-label">Country</div><div class="detail-value">${m.Country}</div></div>`:''}
+        ${m.BoxOffice&&m.BoxOffice!=='N/A'?`<div class="detail-card"><div class="detail-label">Box Office</div><div class="detail-value">${m.BoxOffice}</div></div>`:''}
+        ${m.Awards&&m.Awards!=='N/A'?`<div class="detail-card"><div class="detail-label">Awards</div><div class="detail-value">${m.Awards}</div></div>`:''}
+      </div>
+      ${m.Ratings&&m.Ratings.length?`
+        <div class="ratings-section">
+          <div class="section-title">Ratings</div>
+          ${m.Ratings.map(r=>`<div class="rating-row"><span class="rating-source">${r.Source}</span><span class="rating-val">${r.Value}</span></div>`).join('')}
+        </div>`:''}
+    </div>`;
+
+  window._movie = m;
+}
+
+async function addWatchlist() {
+  await api('/api/watchlist', { method:'POST', body:JSON.stringify(window._movie) });
+  load();
+}
+
+async function markWatched() {
+  const rating = prompt('Your rating (1-10):', '');
+  const date = prompt('Watch date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+  await api('/api/watched', { method:'POST', body:JSON.stringify({...window._movie, userRating:rating, watchDate:date}) });
+  load();
+}
+
+async function toggleFav() {
+  await api('/api/favorites', { method:'POST', body:JSON.stringify(window._movie) });
+  load();
+}
+
+load();
+</script>
+</body>
+</html>

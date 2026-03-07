@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "id": "13442fdda016eb48",
+      "username": "rahul",
+      "email": "",
+      "passwordHash": "a24614c5eff25bf1bbbee71c3042a1e50b6c73b0e561a99250b926bc030b8774",
+      "createdAt": "2026-03-07T17:26:05.139Z"
+    }
+  ],
+  "sessions": {
+    "97b16fc0e979a296de9af45c4649d557e7f7ec5d67b9b085867c54a94ef571c6": {
+      "userId": "13442fdda016eb48",
+      "username": "rahul",
+      "createdAt": "2026-03-07T17:26:05.146Z"
+    }
+  },
+  "userData": {
+    "13442fdda016eb48": {
+      "watchlist": [],
+      "watched": [],
+      "favorites": [],
+      "seriesProgress": {}
+    }
+  }
+}

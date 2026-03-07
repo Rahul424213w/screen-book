@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<h1>📅 Watch Calendar</h1>
+
+<div id="calendar"></div>
+
+<script>
+
+fetch("/api/data")
+.then(r=>r.json())
+.then(data=>{
+
+let cal = document.getElementById("calendar")
+
+data.watched.forEach(m=>{
+
+cal.innerHTML += `
+<div>
+${m.date} — ${m.Title}
+</div>
+`
+
+})
+
+})
+
+</script>
+
+</body>
+</html>

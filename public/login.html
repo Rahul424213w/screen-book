@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScreenBook — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080810;
+    --deep: #0d0d1a;
+    --card: #12121f;
+    --border: rgba(255,255,255,0.07);
+    --gold: #f5c842;
+    --gold2: #e8a020;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --red: #e8453c;
+    --green: #2ecc71;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--black);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── CINEMATIC LEFT PANEL ── */
+  .panel-left {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .film-strip {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    opacity: 0.35;
+    filter: saturate(0.4);
+  }
+
+  .film-strip-col {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .film-strip-col:nth-child(even) { transform: translateY(-60px); }
+  .film-strip-col:nth-child(3) { transform: translateY(-30px); }
+
+  .film-cell {
+    height: 160px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .film-cell::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .film-cell::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .panel-left-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(8,8,16,0.6) 0%,
+      rgba(245,200,66,0.06) 50%,
+      rgba(8,8,16,0.8) 100%
+    );
+  }
+
+  .brand-hero {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+  }
+
+  .brand-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 8vw, 96px);
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    text-shadow: none;
+  }
+
+  .brand-tagline {
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 12px;
+    font-weight: 400;
+  }
+
+  .brand-stats {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin-top: 48px;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── RIGHT PANEL (AUTH FORM) ── */
+  .panel-right {
+    width: 440px;
+    min-width: 440px;
+    background: var(--deep);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 48px;
+    position: relative;
+    overflow-y: auto;
+  }
+
+  .panel-right::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold2), var(--gold), var(--gold2));
+  }
+
+  .form-header {
+    margin-bottom: 40px;
+  }
+
+  .form-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    color: var(--text);
+  }
+
+  .form-subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 36px;
+    gap: 2px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-transform: uppercase;
+  }
+
+  .tab-btn.active {
+    background: var(--card);
+    color: var(--gold);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }
+
+  /* Fields */
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .field input:focus {
+    border-color: rgba(245,200,66,0.4);
+    background: rgba(245,200,66,0.04);
+    box-shadow: 0 0 0 3px rgba(245,200,66,0.08);
+  }
+
+  .field input::placeholder { color: var(--muted); opacity: 0.6; }
+
+  /* Submit button */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold2) 0%, var(--gold) 100%);
+    border: none;
+    border-radius: 10px;
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-top: 8px;
+  }
+
+  .submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(245,200,66,0.3);
+  }
+
+  .submit-btn:active { transform: translateY(0); }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 16px;
+    display: none;
+    line-height: 1.5;
+  }
+
+  .alert.error { background: rgba(232,69,60,0.12); border: 1px solid rgba(232,69,60,0.3); color: #ff7b74; }
+  .alert.success { background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); color: #5dde8e; }
+  .alert.visible { display: block; }
+
+  /* Demo note */
+  .demo-note {
+    margin-top: 28px;
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .demo-note strong { color: var(--gold); font-weight: 500; }
+
+  /* Loading spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: var(--black);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  /* Hide panels */
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  @media (max-width: 768px) {
+    .panel-left { display: none; }
+    .panel-right { width: 100%; min-width: unset; padding: 40px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT CINEMATIC PANEL -->
+<div class="panel-left">
+  <div class="film-strip" id="filmStrip"></div>
+  <div class="panel-left-overlay"></div>
+  <div class="brand-hero">
+    <div class="brand-logo">ScreenBook</div>
+    <div class="brand-tagline">Your personal cinema universe</div>
+    <div class="brand-stats">
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Movies</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">📊</div>
+        <div class="stat-label">Stats</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">🎬</div>
+        <div class="stat-label">Tracked</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT AUTH PANEL -->
+<div class="panel-right">
+  <div class="form-header">
+    <div class="form-title">Welcome Back</div>
+    <div class="form-subtitle">Sign in to your ScreenBook account to track your cinematic journey.</div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+    <button class="tab-btn" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div class="form-panel active" id="loginPanel">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="loginUsername" placeholder="your username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="submit-btn" onclick="handleLogin()" id="loginBtn">SIGN IN</button>
+    <div class="alert" id="loginAlert"></div>
+  </div>
+
+  <!-- REGISTER FORM -->
+  <div class="form-panel" id="registerPanel">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="regUsername" placeholder="choose a username" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Email <span style="color:var(--muted);font-size:10px">(optional)</span></label>
+      <input type="email" id="regEmail" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="regPassword" placeholder="min 6 characters" autocomplete="new-password">
+    </div>
+    <button class="submit-btn" onclick="handleRegister()" id="registerBtn">CREATE ACCOUNT</button>
+    <div class="alert" id="registerAlert"></div>
+  </div>
+
+  <div class="demo-note">
+    <strong>New here?</strong> Create a free account in seconds.<br>
+    Your watchlist and history are saved privately to your account.
+  </div>
+</div>
+
+<script>
+  // Film strip visual
+  const filmStrip = document.getElementById('filmStrip');
+  const colors = [
+    ['#1a1a2e','#16213e'], ['#0f3460','#533483'],
+    ['#2d132c','#ee4540'], ['#1b262c','#0f4c75'],
+    ['#2c003e','#6b2fa0'], ['#1a1a1a','#333'],
+  ];
+  for (let col = 0; col < 4; col++) {
+    const c = document.createElement('div');
+    c.className = 'film-strip-col';
+    for (let i = 0; i < 8; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'film-cell';
+      const [c1, c2] = colors[Math.floor(Math.random() * colors.length)];
+      cell.style.background = `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`;
+      c.appendChild(cell);
+    }
+    filmStrip.appendChild(c);
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (tab === 'login') === (i === 0)));
+    document.getElementById('loginPanel').classList.toggle('active', tab === 'login');
+    document.getElementById('registerPanel').classList.toggle('active', tab === 'register');
+    document.querySelector('.form-header .form-title').textContent = tab === 'login' ? 'Welcome Back' : 'Join ScreenBook';
+    document.querySelector('.form-header .form-subtitle').textContent = tab === 'login'
+      ? 'Sign in to your ScreenBook account to track your cinematic journey.'
+      : 'Create your free account and start building your movie universe.';
+  }
+
+  function showAlert(id, message, type) {
+    const el = document.getElementById(id);
+    el.className = `alert ${type} visible`;
+    el.textContent = message;
+  }
+
+  async function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    if (!username || !password) return showAlert('loginAlert', 'Please fill in all fields.', 'error');
+
+    const btn = document.getElementById('loginBtn');
+    btn.innerHTML = '<span class="spinner"></span>SIGNING IN...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('sb_token', data.token);
+        localStorage.setItem('sb_username', data.username);
+        localStorage.setItem('sb_userId', data.userId);
+        showAlert('loginAlert', '✓ Signed in! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/index.html', 800);
+      } else {
+        showAlert('loginAlert', data.error || 'Sign in failed.', 'error');
+        btn.innerHTML = 'SIGN IN';
+        btn.disabled = false;
+      }
+    } catch {
+      showAlert('loginAlert', 'Network error. Please try again.', 'error');
+      btn.innerHTML = 'SIGN IN';
+      btn.disabled = false;
+    }
+  }
+
+  async function handleRegister() {
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    if (!username || !password) return showAlert('registerAlert', 'Username and password are required.', 'error');
+    if (password.length < 6) return showAlert('registerAlert', 'Password must be at least 6 characters.', 'error');
+
+    const btn = document.getElementById('registerBtn');
+    btn.innerHTML = '<span class="spinner"></span>CREATING...';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showAlert('registerAlert', '✓ Account created! Signing you in...', 'success');
+        // Auto login
+        const loginRes = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const loginData = await loginRes.json();
+        if (loginData.success) {
+          localStorage.setItem('sb_token', loginData.token);
+          localStorage.setItem('sb_username', loginData.username);
+          localStorage.setItem('sb_userId', loginData.userId);
+          setTimeout(() => window.location.href = '/index.html', 800);
+        }
+      } else {
+        showAlert('registerAlert', data.error || 'Registration failed.', 'error');
+        btn.innerHTML = 'CREATE ACCOUNT';
+        btn.disabled = false;
+      }
+    } catch {
+      showAlert('registerAlert', 'Network error. Please try again.', 'error');
+      btn.innerHTML = 'CREATE ACCOUNT';
+      btn.disabled = false;
+    }
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const loginActive = document.getElementById('loginPanel').classList.contains('active');
+      if (loginActive) handleLogin(); else handleRegister();
+    }
+  });
+
+  // If already logged in, redirect
+  if (localStorage.getItem('sb_token')) {
+    fetch('/api/me', { headers: { 'x-auth-token': localStorage.getItem('sb_token') } })
+      .then(r => r.ok ? window.location.href = '/index.html' : null)
+      .catch(() => {});
+  }
+</script>
+</body>
+</html>
